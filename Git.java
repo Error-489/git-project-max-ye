@@ -25,7 +25,7 @@ public class Git {
         }
     }
 
-    public static boolean CreateFolderFile() throws IOException { // return false if there is no
+    public static boolean init() throws IOException { // return false if there is no
                                                                   // folder that is created,else
                                                                   // return true;
         int CreatedCount = 0;
@@ -64,16 +64,16 @@ public class Git {
             throw new IOException("No such files: " + filePath);
         }
         FileReader reader = new FileReader(filePath);
-        StringBuilder toSave = new StringBuilder();
+        StringBuilder filecontent = new StringBuilder();
         int character = reader.read();
         while (character != -1) {
-            toSave.append((char) character);
+            filecontent.append((char) character);
             character = reader.read();
         }
         reader.close();
         MessageDigest digest = MessageDigest.getInstance("SHA-1");
 
-        byte[] hashBytes = digest.digest(toSave.toString().getBytes("UTF-8"));
+        byte[] hashBytes = digest.digest(filecontent.toString().getBytes("UTF-8"));
         StringBuilder hex = new StringBuilder();
 
         for (byte bite : hashBytes) {
@@ -114,7 +114,7 @@ public class Git {
         return hash;
     }
 
-    public static void add(String filePath) throws IOException, NoSuchAlgorithmException {
+    public static void stage(String filePath) throws IOException, NoSuchAlgorithmException {
         String hash = createBlob(filePath);
         File indexFile = new File("git/index");
         if (!indexFile.exists()) {

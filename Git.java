@@ -17,11 +17,34 @@ public class Git {
         }
         try {
             if (!init()) {
-                System.out.println("Git Repository Already Exists");
+                System.out.println("Git Repository Already Exists adding" + args[0]);
             } else {
                 System.out.println("Git Repository Created");
             }
-            index(args[0]);
+                    File argument = new File(args[0]); //if you hard code this ima crash out
+        if (argument.isDirectory()) {
+            ArrayList<File> folders = new ArrayList<>();
+            folders.add(argument);
+        for (int i = 0; i < folders.size(); i++) {
+            File folder = folders.get(i);
+            File[] files = folder.listFiles();
+
+            if (files == null) {
+                throw new IOException("Could not read directory: " + folder.getPath());
+            }
+
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    folders.add(file); 
+                } 
+                else {
+                    index(file.getPath()); 
+                }
+            }
+        }
+        } else {
+            index(args[0]); 
+        }
         } catch (IOException | NoSuchAlgorithmException e) {
             System.out.println("File error: " + e.getMessage());
         }
@@ -30,6 +53,7 @@ public class Git {
     public static boolean init() throws IOException { // return false if there is no
                                                                   // folder that is created,else
                                                                   // return true;
+                                                                  //classic yiewi ye comment :<
         int CreatedCount = 0;
         File gitFolder = new File("git/");
         if (!gitFolder.exists()) {/////
@@ -147,11 +171,11 @@ public class Git {
     	lines.add(hash + " " + relativePath);
     	Files.writeString(index, String.join("\n", lines));
 	}
-    public static String createTree(ArrayList<String> currlist, String dirPath) throws IOException, NoSuchAlgorithmException {
+    public static String createTree(ArrayList<String> workingList, String dirPath) throws IOException, NoSuchAlgorithmException {
 
         ArrayList<String> childern = new ArrayList<>();
 
-        for (String entry : currlist) {
+        for (String entry : workingList) {
             String[] parts = entry.split(" ", 3);
             String path = parts[2];
 
@@ -175,7 +199,7 @@ public class Git {
                 
                 if(currName.compareTo(prevName) > 0) {
                     String hold = childern.get(i);
-                    childern.set(j, childern.get(j));
+                    childern.set(i, childern.get(j));
                     childern.set(j, hold);
                 }
             }
@@ -205,4 +229,5 @@ public class Git {
             Files.write(treeFile, treeBytes);
     }
     return hash;
+}
 }

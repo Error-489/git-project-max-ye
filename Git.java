@@ -32,7 +32,7 @@ public class Git {
                                                                   // return true;
         int CreatedCount = 0;
         File gitFolder = new File("git/");
-        if (!gitFolder.exists()) {
+        if (!gitFolder.exists()) {/////
             gitFolder.mkdir();
             CreatedCount++;
         }
@@ -147,5 +147,62 @@ public class Git {
     	lines.add(hash + " " + relativePath);
     	Files.writeString(index, String.join("\n", lines));
 	}
-        
+    public static String createTree(ArrayList<String> currlist, String dirPath) throws IOException, NoSuchAlgorithmException {
+
+        ArrayList<String> childern = new ArrayList<>();
+
+        for (String entry : currlist) {
+            String[] parts = entry.split(" ", 3);
+            String path = parts[2];
+
+            int end = path.lastIndexOf('/');
+            String dir = "";
+
+            if(end != -1) {
+                dir = path.substring(0, end);
+            }
+
+            if(dir.equals(dirPath)) {
+                String fileName = path.substring(end + 1);
+                childern.add(parts[0] + " " + parts[1] + " " + fileName);
+            }
+        }
+
+        for (int i = 0; i < childern.size() - 1; i++) {
+            for (int j = i + 1; j < childern.size(); j++) {
+                String currName = childern.get(i).split(" ", 3)[2];
+                String prevName = childern.get(j).split(" ", 3)[2];
+                
+                if(currName.compareTo(prevName) > 0) {
+                    String hold = childern.get(i);
+                    childern.set(j, childern.get(j));
+                    childern.set(j, hold);
+                }
+            }
+        }
+
+        StringBuilder content = new StringBuilder();
+
+        for(String child : childern) {
+            content.append(child).append('\n');
+        }
+
+        byte[] treeBytes = content.toString().getBytes("UTF-8");
+        MessageDigest digest = MessageDigest.getInstance("SHA-1");
+        byte[] hashBytes = digest.digest(treeBytes);
+
+        StringBuilder hex = new StringBuilder();
+
+        for(byte bit : hashBytes){
+            hex.append(String.format("%02x", bit & 0xff));
+        }
+        String hash = hex.toString();
+        Path objectsFolder = Path.of("git", "objects");
+        Files.createDirectories(objectsFolder);
+        Path treeFile = objectsFolder.resolve(hash); 
+
+         if (!Files.exists(treeFile)) {
+            Files.write(treeFile, treeBytes);
+    }
+    return hash;
 }

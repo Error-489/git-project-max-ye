@@ -21,7 +21,13 @@ public class Git {
             } else {
                 System.out.println("Git Repository Created");
             }
-                    File argument = new File(args[0]); //if you hard code this ima crash out
+            File argument = new File(args[0]); //if you hard code this ima crash out, arg zero just takes the first arugemnt i.e java Git txt.file txt.file is the first arg
+            //it also works for dir's now
+            if (args[0].equals("tree")) { 
+                String rootHash = createTreeFromIndex();
+                System.out.println("Root tree: " + rootHash);
+                return; 
+            }
         if (argument.isDirectory()) {
             ArrayList<File> folders = new ArrayList<>();
             folders.add(argument);
@@ -229,6 +235,8 @@ public class Git {
                 Files.write(treeFile, treeBytes);
         }
         return hash;
+    }
+    
         public static String createTreeFromIndex() throws IOException, NoSuchAlgorithmException {
 
             ArrayList<String> workingList = new ArrayList<>();
@@ -268,9 +276,9 @@ public class Git {
                 String hash = createTree(workingList, Deepdir); 
 
                 for (int i = workingList.size() - 1; i >= 0; i--) {
-                    String path = workingList.get(i).split(" ", 3)[2];
+                    String coolpath = workingList.get(i).split(" ", 3)[2];
 
-                    if (getDirectory(path).equals(Deepdir)) {
+                    if (getDirectory(coolpath).equals(Deepdir)) {
                         workingList.remove(i); 
                     }
                 }
@@ -282,15 +290,13 @@ public class Git {
                 }
             }
         }
+    }
 
     private static String getDirectory(String path) {
-        int lastSlash = path.lastIndexOf('/'); 
-
+        int lastSlash = path.lastIndexOf('/');
         if (lastSlash == -1) {
             return ""; 
         }
-
         return path.substring(0, lastSlash);
-    }
     }
 }
